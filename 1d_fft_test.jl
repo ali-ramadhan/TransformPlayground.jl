@@ -5,15 +5,24 @@ using CUDA
 
 Random.seed!(0)
 
-A_cpu = randn(Float64, 5)
-A_gpu = CuArray(A_cpu)
+FT = Float64
+ε = eps(FT)
 
-B_cpu = FFTW.fft(A_cpu)
-B_gpu = CUDA.CUFFT.fft(A_gpu)
+# Test both even and odd sizes
+for N in (4, 5)
+    A_cpu = rand(Float64, N)
+    A_gpu = CuArray(A_cpu)
 
-@test isapprox.(B_cpu, Array(B_gpu), atol=eps(Float64)) |> all
+    B_cpu = FFTW.fft(A_cpu)
+    B_gpu = CUDA.CUFFT.fft(A_gpu)
 
-C_cpu = FFTW.ifft(B_cpu)
-C_gpu = CUDA.CUFFT.ifft(B_gpu)
+    @test isapprox.(B_cpu, Vector(B_gpu), atol=ε) |> all
 
-@test isapprox.(C_cpu, Array(C_gpu), atol=eps(Float64)) |> all
+    C_cpu = FFTW.ifft(B_cpu)
+    C_gpu = CUDA.CUFFT.ifft(B_gpu)
+
+    @test isapprox.(C_cpu, Vector(C_gpu), atol=ε) |> all
+
+    @test isapprox.(A_cpu, C_cpu, atol=ε) |> all
+    @test isapprox.(Vector(A_gpu), Vector(C_gpu), atol=ε) |> all
+end
