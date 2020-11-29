@@ -10,7 +10,7 @@ FT = Float64
 
 # Test both even and odd sizes
 for N in (4, 5)
-    A_cpu = rand(Float64, N)
+    A_cpu = rand(FT, N)
     A_gpu = CuArray(A_cpu)
 
     B_cpu = FFTW.fft(A_cpu)
