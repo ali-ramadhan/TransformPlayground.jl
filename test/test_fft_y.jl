@@ -10,7 +10,7 @@ FT = Float64
 
 N = 4
 
-A_cpu = rand(Float64, (N, N, N))
+A_cpu = rand(FT, (N, N, N))
 A_gpu = CuArray(A_cpu)
 
 B_cpu = FFTW.fft(A_cpu, 2)

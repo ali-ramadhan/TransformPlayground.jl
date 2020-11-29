@@ -10,7 +10,7 @@ FT = Float64
 ε = eps(FT)
 
 for N in (4, 5)
-    A_cpu = randn(Float64, N)
+    A_cpu = randn(FT, N)
     A_gpu = CuArray(A_cpu)
 
     B_cpu = FFTW.r2r(A_cpu, FFTW.REDFT10)
