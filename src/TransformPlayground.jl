@@ -1,7 +1,10 @@
 module TransformPlayground
 
-export ω, dct_makhoul_1d
+export dct_makhoul_1d, idct_makhoul_1d,
+       benchmark_cpu_fft, benchmark_cpu_dct
 
+using BenchmarkTools
+using FFTW
 using CUDA
 
 include("dct_makhoul.jl")
