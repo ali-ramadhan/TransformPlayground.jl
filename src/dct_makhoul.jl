@@ -43,3 +43,61 @@ function idct_makhoul_1d(A::CuArray)
 
     return C
 end
+
+function dct_makhoul_2d(A::CuArray)
+    Nx, Ny = size(A)
+
+    # DCT along dimension 1
+
+    B = similar(A)
+
+    for j in 1:Ny, i in 1:Nx
+        B[permute(i, Nx), j] = A[i, j]
+    end
+
+    B = CUDA.CUFFT.fft(B, 1)
+
+    for j in 1:Ny, i in 1:Nx
+        B[i, j] = 2 * ω(4Nx, i-1) * B[i, j]
+    end
+
+    B = real(B)
+
+    # DCT along dimension 2
+
+    C = similar(A)
+
+    for j in 1:Ny, i in 1:Nx
+        C[i, permute(j, Ny)] = B[i, j]
+    end
+
+    C = CUDA.CUFFT.fft(C, 2)
+
+    for j in 1:Ny, i in 1:Nx
+        C[i, j] = 2 * ω(4Ny, j-1) * C[i, j]
+    end
+
+    return real(C)
+end
+
+function dct_makhoul_3d(A::CuArray)
+    B = similar(A)
+    Nx, Ny, Nz = size(A)
+
+    for k in 1:Nz, j in 1:Ny, i in 1:Nx
+        i′ = permute(i, Nx)
+        j′ = permute(j, Ny)
+        k′ = permute(k, Nz)
+        B[i′, j′, k′] = A[i, j, k]
+    end
+
+    B = CUDA.CUFFT.fft(B)
+
+    for k in 1:Nz, j in 1:Ny, i in 1:Nx
+        B[i, j, k] = 2 * ω(4Nx, i-1) * B[i, j, k]
+        B[i, j, k] = 2 * ω(4Ny, j-1) * B[i, j, k]
+        B[i, j, k] = 2 * ω(4Nz, k-1) * B[i, j, k]
+    end
+
+    return real(B)
+end
